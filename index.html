@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="mn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Чулуу таалцах</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,sans-serif;background:linear-gradient(rgba(0,0,0,0.55),rgba(0,0,0,0.55)),url('https://static.vecteezy.com/system/resources/thumbnails/016/961/935/small/space-game-background-neon-night-alien-landscape-free-vector.jpg') center/cover no-repeat fixed;color:#fff;padding:1rem;min-height:100vh}
+.wrap{max-width:480px;margin:0 auto}
+.screen{display:none}.screen.active{display:block}
+.card{background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.2);border-radius:12px;padding:1.25rem;margin-bottom:12px;backdrop-filter:blur(8px)}
+.btn{width:100%;padding:10px 14px;border:1px solid rgba(255,255,255,0.3);border-radius:8px;background:rgba(255,255,255,0.15);color:#fff;font-size:14px;cursor:pointer;margin-bottom:8px;text-align:center}
+.btn:hover{background:rgba(255,255,255,0.25)}
+.btn-primary{background:#534AB7;color:#fff;border-color:#534AB7}
+.btn-primary:hover{background:#3C3489}
+.inp{width:100%;padding:9px 12px;border:1px solid rgba(255,255,255,0.3);border-radius:8px;font-size:15px;margin-bottom:10px;color:#fff;background:rgba(255,255,255,0.12)}
+.inp:focus{outline:2px solid #a89ff5;border-color:#a89ff5}
+.lbl{font-size:12px;color:#bbb;margin-bottom:4px}
+.err{color:#ff8585;font-size:14px;margin-bottom:8px;min-height:18px}
+.badge{display:inline-block;padding:3px 12px;border-radius:8px;font-size:12px;font-weight:500}
+.badge-p{background:rgba(167,139,250,0.3);color:#e0d9ff}
+.badge-ok{background:#EAF3DE;color:#27500A}
+.badge-err{background:#FCEBEB;color:#791F1F}
+.row{display:flex;gap:10px;margin-bottom:12px}
+.col{flex:1}
+.stat{background:rgba(255,255,255,0.1);border-radius:10px;padding:18px 14px;text-align:center;transition:border 0.2s;backdrop-filter:blur(6px)}
+.stat .n{font-size:56px;font-weight:600;color:#fff;line-height:1}
+.stat .l{font-size:13px;color:#ccc;margin-top:6px}
+.stat .sub{font-size:11px;color:rgba(255,255,255,0.5);margin-top:3px}
+.log-box{background:rgba(0,0,0,0.3);border-radius:8px;padding:10px 14px;font-size:13px;color:rgba(255,255,255,0.8);margin-bottom:12px;max-height:200px;overflow-y:auto}
+.log-box p{margin-bottom:4px;line-height:1.5;padding-left:4px}
+.log-ok{color:#27500A;font-weight:500}
+.log-err{color:#A32D2D;font-weight:500}
+.log-info{color:#185FA5}
+h2{font-size:17px;font-weight:500;margin-bottom:14px;color:#fff}
+.center{text-align:center}
+.big{font-size:26px;font-weight:500;color:#fff}
+.muted{font-size:13px;color:rgba(255,255,255,0.6)}
+.hist-item{border-bottom:1px solid rgba(255,255,255,0.15);padding:10px 0;font-size:13px;color:#fff}
+.hist-item:last-child{border-bottom:none}
+.nuuh-row{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.nuuh-val{font-size:24px;font-weight:500;min-width:36px;text-align:center;color:#a89ff5}
+.step-label{font-size:12px;margin-bottom:10px;padding:8px 12px;background:rgba(83,74,183,0.4);border-radius:6px;color:#c8c3ff;line-height:1.5}
+.divider{border:none;border-top:1px solid rgba(255,255,255,0.15);margin:12px 0}
+.score-box{background:rgba(255,255,255,0.1);border-radius:8px;padding:8px 12px;font-size:13px;color:rgba(255,255,255,0.85);margin-bottom:10px}
+
+#result-overlay{
+  display:none;position:fixed;inset:0;z-index:999;
+  align-items:center;justify-content:center;flex-direction:column;
+  color:#fff;text-align:center;padding:2rem;
+  animation:fadeIn 0.2s ease;
+}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+#res-icon{font-size:72px;font-weight:700;line-height:1;margin-bottom:12px}
+#res-title{font-size:24px;font-weight:600;margin-bottom:8px}
+#res-sub{font-size:18px;opacity:0.9;margin-bottom:6px}
+#res-info{font-size:14px;opacity:0.75}
+::placeholder{color:rgba(255,255,255,0.4)} input[type=range]{accent-color:#a89ff5}input::placeholder{color:rgba(255,255,255,0.5)}
+</style>
+</head>
+<body>
+
+<div id="result-overlay">
+  <div id="res-icon">✓</div>
+  <div id="res-title"></div>
+  <div id="res-sub"></div>
+  <div id="res-info"></div>
+</div>
+<div class="wrap">
+
+<!-- MENU -->
+<div id="s-menu" class="screen active" style="padding:1rem 0">
+  <div class="center" style="padding:2rem 0 1.5rem">
+    <div style="font-size:48px;margin-bottom:12px">&#9679;</div>
+    <div class="big">Чулуу таалцах</div>
+    <div class="muted" style="margin-top:8px;line-height:1.8">
+      Тус бүр 10 чулуутай эхэлнэ.<br>
+      Гараасаа чулуу нууна → Нийлбэрийг таана<br>
+      Зөв таавал нөгөө тоглогчийн чулууг авна.
+    </div>
+  </div>
+  <button class="btn btn-primary" onclick="go('s-setup')">Шинэ тоглоом эхлүүлэх</button>
+  <button class="btn" onclick="go('s-hist')">Өмнөх дүнгүүд</button>
+</div>
+
+<!-- SETUP -->
+<div id="s-setup" class="screen" style="padding:1rem 0">
+  <h2>Тоглогчид</h2>
+  <div class="card">
+    <div class="lbl">1-р тоглогчийн нэр</div>
+    <input class="inp" id="n1" placeholder="Тоглогч 1" />
+    <div class="lbl">2-р тоглогчийн нэр</div>
+    <input class="inp" id="n2" placeholder="Тоглогч 2" />
+  </div>
+  <div class="err" id="setup-err"></div>
+  <button class="btn btn-primary" onclick="startGame()">Тоглоом эхлүүлэх</button>
+  <button class="btn" onclick="go('s-menu')">Буцах</button>
+</div>
+
+<!-- NUUH -->
+<div id="s-nuuh" class="screen" style="padding:1rem 0">
+  <h2 id="nuuh-title">... чулуу нуух</h2>
+  <div class="step-label" id="nuuh-step"></div>
+  <div class="card">
+    <div class="score-box" id="nuuh-score"></div>
+    <div class="lbl">Хэдэн чулуу гараасаа нуух вэ?</div>
+    <div style="margin:14px 0 10px">
+      <div class="nuuh-row">
+        <button class="btn" style="width:44px;padding:8px;margin:0;font-size:18px" onclick="nuuhAdj(-1)">−</button>
+        <div class="nuuh-val" id="nuuh-val">5</div>
+        <button class="btn" style="width:44px;padding:8px;margin:0;font-size:18px" onclick="nuuhAdj(1)">+</button>
+        <input type="range" id="nuuh-slider" min="1" max="10" value="5" style="flex:1;accent-color:#534AB7" oninput="nuuhSlide(this.value)">
+      </div>
+      <div class="center muted" style="font-size:12px;margin-top:4px">1 - <span id="nuuh-max2">10</span> хооронд сонгоно</div>
+    </div>
+  </div>
+  <button class="btn btn-primary" onclick="confirmNuuh()">Батлах →</button>
+</div>
+
+<!-- TAAH -->
+<div id="s-taah" class="screen" style="padding:1rem 0">
+  <div class="row">
+    <div class="col stat" id="stat1">
+      <div class="n" id="tc1">???</div>
+      <div class="l" id="tn1">-</div>
+      <div class="sub">нийт чулуу</div>
+    </div>
+    <div style="display:flex;align-items:center;padding:0 2px">
+      <span class="muted" style="font-size:11px">vs</span>
+    </div>
+    <div class="col stat" id="stat2">
+      <div class="n" id="tc2">???</div>
+      <div class="l" id="tn2">-</div>
+      <div class="sub">нийт чулуу</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div style="margin-bottom:10px">
+      <span class="badge badge-p" id="taah-badge">... -iin ээлж</span>
+    </div>
+    <div class="score-box">
+      Таны гарт: <strong id="taah-minii">?</strong> чулуу нуугдсан<br>
+      Нөгөөгийн гарт: <strong>[нуугдсан]</strong>
+    </div>
+    <hr class="divider">
+    <div class="lbl">2хүний чулууний нийлбэр:</div>
+    <input class="inp" id="taalt-inp" type="number" min="2" placeholder="Нийлбэр оруулна уу..." />
+    <div class="err" id="taalt-err"></div>
+    <button class="btn btn-primary" onclick="doTaalt()">Таалцах →</button>
+  </div>
+  <div class="log-box" id="log"></div>
+</div>
+-
+<div id="s-result" class="screen" style="padding:1rem 0">
+  <div class="card center" style="padding:2rem 1.25rem">
+    <div style="font-size:52px;margin-bottom:12px">&#127942;</div>
+    <div class="big" id="win-ner">-</div>
+    <div class="muted" id="win-sub" style="margin-top:10px;line-height:1.8"></div>
+  </div>
+  <div class="row">
+    <div class="col stat">
+      <div class="n" id="rc1">0</div>
+      <div class="l" id="rn1">-</div>
+      <div class="sub">чулуу</div>
+    </div>
+    <div class="col stat">
+      <div class="n" id="rc2">0</div>
+      <div class="l" id="rn2">-</div>
+      <div class="sub">чулуу</div>
+    </div>
+  </div>
+  <button class="btn btn-primary" onclick="go('s-setup')">Дахин тоглох</button>
+  <button class="btn" onclick="go('s-hist')">Дүн харах</button>
+  <button class="btn" onclick="go('s-menu')">Үндсэн цэс</button>
+</div>
+
+<!-- HISTORY -->
+<div id="s-hist" class="screen" style="padding:1rem 0">
+  <h2>Өмнөх дүнгүүд</h2>
+  <div class="card" id="hist-body"></div>
+  <button class="btn" onclick="go('s-menu')">Буцах</button>
+</div>
+
+</div>
+<script>
+var ANKHNI = 10;
+var G = {};
+var HIST = [];
+try { HIST = JSON.parse(localStorage.getItem('ch_hist3') || '[]'); } catch(e){}
+
+function go(id) {
+  document.querySelectorAll('.screen').forEach(function(s){ s.classList.remove('active'); });
+  document.getElementById(id).classList.add('active');
+  if (id === 's-hist') renderHist();
+}
+
+function addLog(msg, type) {
+  var d = document.getElementById('log');
+  var p = document.createElement('p');
+  p.textContent = msg;
+  if (type) p.className = 'log-' + type;
+  d.appendChild(p);
+  d.scrollTop = d.scrollHeight;
+}
+
+// =====================
+// TOGLOOM EHLUULEH
+// =====================
+function startGame() {
+  var n1 = document.getElementById('n1').value.trim();
+  var n2 = document.getElementById('n2').value.trim();
+  var err = document.getElementById('setup-err');
+  if (!n1 || !n2) { err.textContent = 'Тоглогчийн нэр хоосон байж болохгүй!'; return; }
+  if (n1.toLowerCase() === n2.toLowerCase()) { err.textContent = 'Нэр адил байж болохгүй!'; return; }
+  err.textContent = '';
+
+  G = {
+    n1: n1, n2: n2,
+    c1: ANKHNI,   // 1-r toglochiin NIIT чулуу
+    c2: ANKHNI,   // 2-r toglochiin NIIT чулуу
+    gar1: 0,      // 1-r toglochiin garand нуугдсан чулуу
+    gar2: 0,      // 2-r toglochiin garand нуугдсан чулуу
+    эелж: 1,      // Taah эелж (1 eswel 2)
+    nuuhEelj: 1,  // Odoogoor heni nuuj baigaa
+    эелжToo: 1    // Eeljiin toolog
+  };
+
+  document.getElementById('log').innerHTML = '';
+  addLog('=== Тоглоом эхэллээ! ===', 'info');
+  addLog(n1 + ': ' + ANKHNI + ' чулуу  |  ' + n2 + ': ' + ANKHNI + ' чулуу', 'info');
+
+  // 1-r togloch ehelj nuuna
+  startNuuh(1);
+}
+
+// =====================
+// NUUH ALHAM
+// =====================
+function startNuuh(hvn) {
+  G.nuuhEelj = hvn;
+  var ner = hvn === 1 ? G.n1 : G.n2;
+  var max = hvn === 1 ? G.c1 : G.c2;
+  var def = Math.min(Math.ceil(max / 2), max);
+
+  document.getElementById('nuuh-title').textContent = ner + ' чулуу нуух';
+  document.getElementById('nuuh-step').textContent =
+    G.ээлжToo + '-r эелж  |  ' + ner + ': ' + max + ' чулууtai';
+  document.getElementById('nuuh-score').textContent = G.n1 + ' vs ' + G.n2;
+  document.getElementById('nuuh-max2').textContent = max;
+
+  var sl = document.getElementById('nuuh-slider');
+  sl.max = max;
+  sl.value = def;
+  document.getElementById('nuuh-val').textContent = def;
+
+  go('s-nuuh');
+}
+
+function nuuhAdj(d) {
+  var sl = document.getElementById('nuuh-slider');
+  var v = parseInt(sl.value) + d;
+  v = Math.max(1, Math.min(parseInt(sl.max), v));
+  sl.value = v;
+  document.getElementById('nuuh-val').textContent = v;
+}
+
+function nuuhSlide(v) {
+  document.getElementById('nuuh-val').textContent = v;
+}
+
+function confirmNuuh() {
+  var v = parseInt(document.getElementById('nuuh-slider').value);
+  if (G.nuuhEelj === 1) {
+    G.gar1 = v;
+    // 2-r togloch nuuna
+    startNuuh(2);
+  } else {
+    G.gar2 = v;
+    // Hoyulaa нуусан - taah ehelne
+    addLog('--- ' + G.ээлжToo + '-r эелж: ' + G.n1 + ' ' + G.gar1 + ' нуусан, ' + G.n2 + ' ' + G.gar2 + ' нуусан ---', 'info');
+    startTaah();
+  }
+}
+
+// =====================
+// TAAH ALHAM
+// =====================
+function startTaah() {
+  var e1 = G.ээлж === 1;
+  var cur = e1 ? G.n1 : G.n2;
+  var miniiGar = e1 ? G.gar1 : G.gar2;
+
+  document.getElementById('tc1').textContent = '???';
+  document.getElementById('tn1').textContent = G.n1;
+  document.getElementById('tc2').textContent = '???';
+  document.getElementById('tn2').textContent = G.n2;
+  document.getElementById('stat1').style.border = e1 ? '2px solid #534AB7' : '1px solid #e0dfd8';
+  document.getElementById('stat2').style.border = e1 ? '1px solid #e0dfd8' : '2px solid #534AB7';
+  document.getElementById('taah-badge').textContent = cur + ' таана!';
+  document.getElementById('taah-minii').textContent = miniiGar;
+  document.getElementById('taalt-inp').value = '';
+  document.getElementById('taalt-err').textContent = '';
+
+  go('s-taah');
+  document.getElementById('taalt-inp').focus();
+}
+
+
+// =====================
+// ZOV/BURUU MESEJ + DARAА TOO HARUULAH
+// =====================
+function showResult(zov, cur, niilber, avsan) {
+  var overlay = document.getElementById('result-overlay');
+  var icon    = document.getElementById('res-icon');
+  var title   = document.getElementById('res-title');
+  var sub     = document.getElementById('res-sub');
+  var info    = document.getElementById('res-info');
+
+  if (zov) {
+    overlay.style.background = 'rgba(39,80,10,0.92)';
+    icon.textContent  = '✓';
+    title.textContent = cur + ' зөв таалаа!';
+    sub.textContent   = 'Нийлбэр: ' + niilber;
+    info.textContent  = cur + ' нөгөөгийн ' + avsan + ' чулууг авлаа!';
+  } else {
+    overlay.style.background = 'rgba(163,45,45,0.92)';
+    icon.textContent  = '✗';
+    title.textContent = cur + ' буруу таалаа!';
+    sub.textContent   = 'Жинхэнэ нийлбэр ' + niilber + ' байсан.';
+    info.textContent  = 'Тоглогчид өөр өөрийн чулуугаа авч дахин нуунаа.';
+  }
+
+  overlay.style.display = 'flex';
+  setTimeout(function() {
+    overlay.style.display = 'none';
+    // Overlay хаагдсаны дараа чулуу тоог харуулна
+    document.getElementById('tc1').textContent = G.c1;
+    document.getElementById('tc2').textContent = G.c2;
+  }, 2200);
+}
+
+// =====================
+// TAALT HIIEH - GOL LOGIC
+// =====================
+function doTaalt() {
+  var v = parseInt(document.getElementById('taalt-inp').value);
+  var err = document.getElementById('taalt-err');
+  if (isNaN(v) || v < 2) { err.textContent = 'Зөв тоо оруулна уу!(2-оос их)!'; return; }
+  err.textContent = '';
+
+  var e1 = G.ээлж === 1;
+  var cur  = e1 ? G.n1 : G.n2;   // Taaj baigaa togloch
+  var nug  = e1 ? G.n2 : G.n1;   // Nugoo togloch
+  var zovNiilber = G.gar1 + G.gar2;
+
+  addLog(cur + ' --> ' + v + ' gej taasan', null);
+
+  if (v === zovNiilber) {
+    // ============================================
+    // ZOW TAASAN
+    // Durem: taasan hun nugoogiin GARIIN чулууg avna
+    // Jishee: c1=9, c2=11, gar1=5, gar2=6 -> niilber=11
+    //   p1 zow taaw: p1 += gar2(6) --> p1=15
+    //                p2 -= gar2(6) --> p2=5
+    //   Niit: 15+5 = 20 (oorchlogdohgui)
+    // ============================================
+    var nuguu_gar = e1 ? G.gar2 : G.gar1;  // Нөгөөгийн гарт байсан чулуу
+
+    // Эхлээд мессеж
+    showResult(true, cur, zovNiilber, nuguu_gar);
+
+    if (e1) {
+      G.c1 += nuguu_gar;   // Taasan hun: nugoogiin gariin чулуу nemne
+      G.c2 -= nuguu_gar;   // Nugoo: gariin чулууgaa alddana
+    } else {
+      G.c2 += nuguu_gar;
+      G.c1 -= nuguu_gar;
+    }
+    G.gar1 = 0;
+    G.gar2 = 0;
+
+    addLog(G.n1 + ': ' + G.c1 + ' чулуу  |  ' + G.n2 + ': ' + G.c2 + ' чулуу', 'info');
+
+
+    // Togloom duussah esehiig shalgana
+    if (G.c1 <= 0) { endGame(G.n2); return; }
+    if (G.c2 <= 0) { endGame(G.n1); return; }
+
+    // Eelj solih: nugoo togloch daraa taana
+    G.ээлж = e1 ? 2 : 1;
+    G.ээлжToo++;
+    addLog('--- ' + G.ээлжToo + '-r ээлж: ' + (e1 ? G.n2 : G.n1) + ' таана ---', 'info');
+    startNuuh(1);
+
+  } else {
+    // ============================================
+    // BURUU TAASAN
+    // Durem: oor ooriin чулууgaa butsaaj avna
+    // Chuluu too oorchlogdohgui, dahin nuuna
+    // ============================================
+    // Эхлээд мессеж
+    showResult(false, cur, zovNiilber, 0);
+
+    G.gar1 = 0;
+    G.gar2 = 0;
+
+    // Eelj solih
+    G.ээлж = e1 ? 2 : 1;
+    G.ээлжToo++;
+    addLog('--- ' + G.ээлжToo + '-r ээлж: ' + (e1 ? G.n2 : G.n1) + ' таана ---', 'info');
+    startNuuh(1);
+  }
+}
+
+// =====================
+// TOGLOOM DUUSAH
+// =====================
+function endGame(ялагч) {
+  addLog('=== ' + ялагч + ' ЯЛАГЧ! ===', 'ok');
+
+  document.getElementById('rc1').textContent = G.c1;
+  document.getElementById('rn1').textContent = G.n1;
+  document.getElementById('rc2').textContent = G.c2;
+  document.getElementById('rn2').textContent = G.n2;
+  document.getElementById('win-ner').textContent = ялагч + ' ЯЛАГЧ!';
+  document.getElementById('win-sub').textContent =
+    G.n1 + ': ' + G.c1 + ' чулуу\n' + G.n2 + ': ' + G.c2 + ' чулуу\nNiit ээлж: ' + G.ээлжToo;
+
+  var rec = { n1:G.n1, n2:G.n2, c1:G.c1, c2:G.c2, ялагч:ялагч, ээлж:G.ээлжToo, ognoo:new Date().toLocaleString() };
+  HIST.unshift(rec);
+  if (HIST.length > 20) HIST.pop();
+  try { localStorage.setItem('ch_hist3', JSON.stringify(HIST)); } catch(e) {}
+  go('s-result');
+}
+
+// =====================
+// TUUH
+// =====================
+function renderHist() {
+  var b = document.getElementById('hist-body');
+  if (!HIST.length) {
+    b.innerHTML = '<div class="muted center" style="padding:1rem">Тоглоомын бүртгэл алга.</div>';
+    return;
+  }
+  var h = '';
+  HIST.forEach(function(r, i) {
+    h += '<div class="hist-item">'
+      + '<span class="badge badge-p">#' + (i+1) + '</span> '
+      + '<strong>' + r.ялагч + '</strong> ялагч'
+      + ' <span class="muted">(' + r.ээлж + ' ээлж)</span><br>'
+      + '<span class="muted">' + r.n1 + ' ' + r.c1 + ' : ' + r.c2 + ' ' + r.n2 + '</span>'
+      + '<span class="muted" style="float:right;font-size:11px">' + r.ognoo + '</span>'
+      + '</div>';
+  });
+  b.innerHTML = h;
+}
+
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') {
+    if (document.getElementById('s-taah').classList.contains('active')) doTaalt();
+    if (document.getElementById('s-nuuh').classList.contains('active')) confirmNuuh();
+  }
+});
+</script>
+</body>
+</html>
